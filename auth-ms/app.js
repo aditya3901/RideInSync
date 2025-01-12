@@ -6,6 +6,7 @@ const helmet = require("helmet");
 const xss = require("xss-clean");
 
 const userAuthRouter = require("./routes/userAuthRoutes");
+const driverAuthRouter = require("./routes/driverAuthRoutes");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const app = express();
@@ -25,6 +26,7 @@ const limiter = rateLimit({
 app.use("/", limiter);
 
 app.use("/user", userAuthRouter);
+app.use("/driver", driverAuthRouter);
 
 app.all("*", (req, _, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
