@@ -1,6 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
-const rateLimit = require("express-rate-limit");
+// const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
 const xss = require("xss-clean");
@@ -19,12 +19,16 @@ app
   .use(xss())
   .use(mongoSanitize());
 
-const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: "Too many request from this IP, please try again in an hour!",
+// const limiter = rateLimit({
+//   max: 100,
+//   windowMs: 60 * 60 * 1000,
+//   message: "Too many request from this IP, please try again in an hour!",
+// });
+// app.use("/", limiter);
+
+app.get("/test", (_, res) => {
+  res.status(200).send("Auth server is working");
 });
-app.use("/", limiter);
 
 app.use("/common", commonRouter);
 app.use("/user", userAuthRouter);

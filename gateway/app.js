@@ -8,6 +8,10 @@ const PORT = process.env.PORT;
 const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL;
 
 app.use(morgan("dev"));
+app.get("/test", (_, res) => {
+  res.status(200).send("Gateway server is working");
+});
+
 app.use("/auth", proxy(AUTH_SERVICE_URL));
 
 app.use((_, res) => {
