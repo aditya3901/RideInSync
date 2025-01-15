@@ -7,6 +7,7 @@ const xss = require("xss-clean");
 
 const userAuthRouter = require("./routes/userAuthRoutes");
 const driverAuthRouter = require("./routes/driverAuthRoutes");
+const commonRouter = require("./routes/commonRoutes");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const app = express();
@@ -25,6 +26,7 @@ const limiter = rateLimit({
 });
 app.use("/", limiter);
 
+app.use("/common", commonRouter);
 app.use("/user", userAuthRouter);
 app.use("/driver", driverAuthRouter);
 
