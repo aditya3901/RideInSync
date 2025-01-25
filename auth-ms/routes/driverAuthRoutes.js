@@ -10,6 +10,8 @@ router.post("/logout", driverAuthController.logout);
 
 router.use(driverAuthController.protect);
 
+router.use("/details", driverAuthController.getDetails);
+
 router.route("/addDocs").post(driverDocsController.addRequiredDocs);
 router.route("/getDocs").get(driverDocsController.getRequiredDocs);
 router.route("/uploadDocs").post(driverDocsController.uploadDocs);

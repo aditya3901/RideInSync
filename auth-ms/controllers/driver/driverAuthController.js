@@ -111,3 +111,11 @@ exports.logout = catchAsync(async (req, res, _) => {
     message: "Logged out successfully",
   });
 });
+
+exports.getDetails = catchAsync(async (req, res, _) => {
+  const driver = req.driver;
+  res.status(200).json({
+    status: "success",
+    driver: driver,
+  });
+});

@@ -94,3 +94,11 @@ exports.logout = catchAsync(async (req, res, _) => {
     message: "Logged out successfully",
   });
 });
+
+exports.getDetails = catchAsync(async (req, res, _) => {
+  const user = req.user;
+  res.status(200).json({
+    status: "success",
+    user: user,
+  });
+});
