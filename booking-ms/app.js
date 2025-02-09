@@ -18,7 +18,7 @@ app
   .use(mongoSanitize());
 
 app.get("/test", (_, res) => {
-  res.status(200).send("Admin server is working");
+  res.status(200).send("Booking server is working");
 });
 
 app.use("/", bookingRouter);
