@@ -10,10 +10,7 @@ exports.getOffice = catchAsync(async (req, res, next) => {
       `${process.env.GATEWAY_SERVICE_URL}/admin/getOffice/${company}/${city}`
     );
 
-    res.status(200).json({
-      status: "success",
-      data: response.data,
-    });
+    res.status(200).json(response.data);
   } catch (error) {
     return next(new AppError("Error fetching office data", 500));
   }
@@ -27,10 +24,7 @@ exports.getTimeslots = catchAsync(async (req, res, next) => {
       `${process.env.GATEWAY_SERVICE_URL}/admin/getTimeslots/${company}/${type}`
     );
 
-    res.status(200).json({
-      status: "success",
-      data: response.data,
-    });
+    res.status(200).json(response.data);
   } catch (error) {
     return next(new AppError("Error fetching timeslots data", 500));
   }

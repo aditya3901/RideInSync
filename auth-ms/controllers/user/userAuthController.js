@@ -18,7 +18,8 @@ const createSendToken = (user, statusCode, res, type) => {
 };
 
 exports.register = catchAsync(async (req, res, next) => {
-  const { deviceID, deviceType, deviceToken, mobile, name, email } = req.body;
+  const { deviceID, deviceType, deviceToken, mobile, name, email, company } =
+    req.body;
 
   const user = await User.findOne({ mobile });
   if (user) {
@@ -29,6 +30,7 @@ exports.register = catchAsync(async (req, res, next) => {
     name,
     email,
     mobile,
+    company,
     device_id: deviceID,
     device_type: deviceType,
     device_token: deviceToken,
@@ -100,5 +102,31 @@ exports.getDetails = catchAsync(async (req, res, _) => {
   res.status(200).json({
     status: "success",
     user: user,
+  });
+});
+
+exports.setUserAddress = catchAsync(async (req, res, _) => {
+  const user = req.user;
+  const { address, lat, lon, type } = req.body;
+
+  if (type === "primary") {
+    user.primary_address = {
+      type: "Point",
+      coordinates: [lat, lon],
+      address: address,
+    };
+  } else {
+    user.secondary_address = {
+      type: "Point",
+      coordinates: [lat, lon],
+      address: address,
+    };
+  }
+
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Address updated successfully",
   });
 });

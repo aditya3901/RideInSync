@@ -23,10 +23,14 @@ const userSchema = new mongoose.Schema({
       message: (props) => `${props.value} is not a valid mobile number!`,
     },
   },
+  company: {
+    type: String,
+    required: [true, "Please provide your company name"],
+  },
   device_id: String,
   device_type: String,
   device_token: String,
-  location: {
+  primary_address: {
     type: {
       type: String,
       default: "Point",
@@ -36,6 +40,19 @@ const userSchema = new mongoose.Schema({
       type: [Number],
       index: "2dsphere",
     },
+    address: String,
+  },
+  secondary_address: {
+    type: {
+      type: String,
+      default: "Point",
+      enum: ["Point"],
+    },
+    coordinates: {
+      type: [Number],
+      index: "2dsphere",
+    },
+    address: String,
   },
   uploadedDocuments: [
     {

@@ -11,6 +11,7 @@ router.post("/logout", userAuthController.protect, userAuthController.logout);
 router.use(userAuthController.protect);
 
 router.use("/details", userAuthController.getDetails);
+router.post("/setAddress", userAuthController.setUserAddress);
 
 router.route("/addDocs").post(userDocsController.addRequiredDocs);
 router.route("/getDocs").get(userDocsController.getRequiredDocs);
