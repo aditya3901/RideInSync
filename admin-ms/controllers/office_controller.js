@@ -65,3 +65,20 @@ exports.getTimeslots = catchAsync(async (req, res, next) => {
     timeslots: timeslots,
   });
 });
+
+// const getFutureTimeslots = async (companyId, type, userTime) => {
+//   try {
+//       const thresholdTime = moment(userTime, "HH:mm").add(1, 'hours').format("HH:mm");
+
+//       const timeslots = await Timeslot.find({
+//           company: companyId,
+//           type: type,
+//           "times.time": { $gte: thresholdTime } // Filter times >= 1 hour later
+//       }).select('times');
+
+//       return timeslots;
+//   } catch (error) {
+//       console.error("Error fetching future timeslots:", error);
+//       throw error;
+//   }
+// };

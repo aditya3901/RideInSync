@@ -105,28 +105,50 @@ exports.getDetails = catchAsync(async (req, res, _) => {
   });
 });
 
-exports.setUserAddress = catchAsync(async (req, res, _) => {
+exports.setUserAddress = catchAsync(async (req, res, next) => {
   const user = req.user;
-  const { address, lat, lon, type } = req.body;
+  const location = req.body;
 
-  if (type === "primary") {
-    user.primary_address = {
-      type: "Point",
-      coordinates: [lat, lon],
-      address: address,
-    };
-  } else {
-    user.secondary_address = {
-      type: "Point",
-      coordinates: [lat, lon],
-      address: address,
-    };
+  if (!["primary", "secondary"].includes(location.type)) {
+    return next(
+      new AppError(
+        "Invalid address type. Must be 'primary' or 'secondary'",
+        400
+      )
+    );
   }
+
+  user[`${location.type}_address`] = {
+    type: "Point",
+    place_id: location.place_id,
+    address: location.address,
+    landmark: location.landmark ?? "",
+    coordinates: [location.lat, location.lng],
+  };
 
   await user.save();
 
   res.status(200).json({
     status: "success",
     message: "Address updated successfully",
+  });
+});
+
+exports.getUserAddress = catchAsync(async (req, res, next) => {
+  const user = req.user;
+  const type = req.query.type;
+
+  if (!["primary", "secondary"].includes(type)) {
+    return next(
+      new AppError(
+        "Invalid address type. Must be 'primary' or 'secondary'",
+        400
+      )
+    );
+  }
+
+  res.status(200).json({
+    status: "success",
+    address: user[`${type}_address`],
   });
 });

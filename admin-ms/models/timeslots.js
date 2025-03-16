@@ -1,11 +1,10 @@
 const mongoose = require("mongoose");
 
 const timeslotSchema = new mongoose.Schema({
-  company: {
-    type: String,
+  office: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Office",
     required: true,
-    trim: true,
-    index: true,
   },
   type: {
     type: String,
@@ -14,8 +13,8 @@ const timeslotSchema = new mongoose.Schema({
   },
   times: [
     {
-      type: String,
-      required: true,
+      time: { type: String, required: true },
+      maxBookings: { type: Number, default: 12 },
     },
   ],
 });

@@ -1,6 +1,21 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 
+const addressSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    default: "Point",
+    enum: ["Point"],
+  },
+  coordinates: {
+    type: [Number],
+    index: "2dsphere",
+  },
+  address: String,
+  landmark: String,
+  place_id: String,
+});
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -31,28 +46,12 @@ const userSchema = new mongoose.Schema({
   device_type: String,
   device_token: String,
   primary_address: {
-    type: {
-      type: String,
-      default: "Point",
-      enum: ["Point"],
-    },
-    coordinates: {
-      type: [Number],
-      index: "2dsphere",
-    },
-    address: String,
+    type: addressSchema,
+    default: null,
   },
   secondary_address: {
-    type: {
-      type: String,
-      default: "Point",
-      enum: ["Point"],
-    },
-    coordinates: {
-      type: [Number],
-      index: "2dsphere",
-    },
-    address: String,
+    type: addressSchema,
+    default: null,
   },
   uploadedDocuments: [
     {
