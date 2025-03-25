@@ -2,31 +2,17 @@ const mongoose = require("mongoose");
 
 const officeSchema = new mongoose.Schema({
   company: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Company",
     required: true,
-    trim: true,
-    index: true,
   },
   name: {
     type: String,
     required: true,
-    trim: true,
   },
   address: {
     type: String,
     required: true,
-    trim: true,
-  },
-  city: {
-    type: String,
-    required: true,
-    trim: true,
-    index: true,
-  },
-  state: {
-    type: String,
-    required: true,
-    trim: true,
   },
   location: {
     type: {

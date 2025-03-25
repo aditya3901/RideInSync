@@ -11,12 +11,13 @@ const timeslotSchema = new mongoose.Schema({
     enum: ["login", "logout"],
     required: true,
   },
-  times: [
-    {
-      time: { type: String, required: true },
-      maxBookings: { type: Number, default: 12 },
-    },
-  ],
+  date: {
+    type: Date,
+    required: true,
+  },
+  time: { type: String, required: true },
+  booked: { type: Number, required: true },
+  total: { type: Number, required: true },
 });
 
 module.exports = mongoose.model("Timeslot", timeslotSchema);

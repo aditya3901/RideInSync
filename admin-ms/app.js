@@ -6,7 +6,7 @@ const xss = require("xss-clean");
 
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
-const officeRouter = require("./routes/officeRoutes");
+const adminRouter = require("./routes/adminRoutes");
 const app = express();
 
 app
@@ -20,7 +20,7 @@ app.get("/test", (_, res) => {
   res.status(200).send("Admin server is working");
 });
 
-app.use("/", officeRouter);
+app.use("/", adminRouter);
 
 app.all("*", (req, _, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
