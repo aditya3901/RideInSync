@@ -18,19 +18,21 @@ const createSendToken = (user, statusCode, res, type) => {
 };
 
 exports.register = catchAsync(async (req, res, next) => {
-  const { deviceID, deviceType, deviceToken, mobile, name, email, company } =
+  const { deviceID, deviceType, deviceToken, mobile, name, email, company_id } =
     req.body;
 
-  const user = await User.findOne({ mobile });
+  const user = await User.findOne({ mobile, email });
   if (user) {
-    return next(new AppError("User Already Exists with this mobile", 400));
+    return next(
+      new AppError("User Already Exists with this mobile or email", 400)
+    );
   }
 
   const newUser = await User.create({
     name,
     email,
     mobile,
-    company,
+    company: company_id,
     device_id: deviceID,
     device_type: deviceType,
     device_token: deviceToken,
@@ -123,7 +125,7 @@ exports.setUserAddress = catchAsync(async (req, res, next) => {
     place_id: location.place_id,
     address: location.address,
     landmark: location.landmark ?? "",
-    coordinates: [location.lat, location.lng],
+    coordinates: [location.lng, location.lat], // For Geospactial Query, store in [long, lat] format
   };
 
   await user.save();

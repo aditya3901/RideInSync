@@ -39,8 +39,8 @@ const userSchema = new mongoose.Schema({
     },
   },
   company: {
-    type: String,
-    required: [true, "Please provide your company name"],
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Company",
   },
   device_id: String,
   device_type: String,
