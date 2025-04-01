@@ -3,7 +3,7 @@ const catchAsync = require("../utils/catchAsync");
 const timeslotService = require("../services/timeslotService");
 
 exports.getTimeslots = catchAsync(async (req, res, next) => {
-  const { date, office_id, type, userTime } = req.body;
+  const { date, office_id, type, userTime } = req.query;
 
   const timeslots = await timeslotService.getFutureTimeslots({
     date,
