@@ -8,6 +8,7 @@ const xss = require("xss-clean");
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/errorController");
 const bookingRouter = require("./routes/bookRoutes");
+const rideAssignmentRouter = require("./routes/rideAssignmentRoutes");
 const app = express();
 
 app
@@ -21,7 +22,9 @@ app.get("/test", (_, res) => {
   res.status(200).send("Booking server is working");
 });
 
+// API routes
 app.use("/", bookingRouter);
+app.use("/assignment", rideAssignmentRouter);
 
 app.all("*", (req, _, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
