@@ -50,3 +50,13 @@ exports.getFutureTimeslots = async ({ date, office_id, type, userTime }) => {
 exports.addAdminSlots = async ({ office, login_slots, logout_slots }) => {
   return await AdminSlots.create({ office, login_slots, logout_slots });
 };
+
+exports.updateTimeslot = async ({ timeslotId }) => {
+  const updatedTimeslot = await Timeslot.findByIdAndUpdate(
+    timeslotId,
+    { $inc: { booked: 1 } },
+    { new: true }
+  );
+
+  return updatedTimeslot;
+};

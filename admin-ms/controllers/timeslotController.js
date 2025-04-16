@@ -36,3 +36,16 @@ exports.addAdminSlots = catchAsync(async (req, res, _) => {
     adminSlots,
   });
 });
+
+exports.updateTimeslot = catchAsync(async (req, res, next) => {
+  const { timeslotId } = req.params;
+
+  const updatedTimeslot = await timeslotService.updateTimeslot({
+    timeslotId,
+  });
+
+  res.status(200).json({
+    status: "success",
+    updatedTimeslot,
+  });
+});

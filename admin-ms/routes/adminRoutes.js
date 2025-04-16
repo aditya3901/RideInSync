@@ -12,5 +12,6 @@ router.get("/getOffice", officeController.getNearbyOffices);
 
 router.post("/addTimeslots", timeslotController.addAdminSlots);
 router.get("/getTimeslots", timeslotController.getTimeslots);
+router.post("/updateTimeslot/:timeslotId", timeslotController.updateTimeslot);
 
 module.exports = router;
