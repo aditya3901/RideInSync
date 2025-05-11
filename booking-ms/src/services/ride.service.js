@@ -26,8 +26,24 @@ class RideService {
     );
 
     try {
-      // Update timeslot via gateway service
-      await HttpService.post(`/admin/updateTimeslot/${timeslot_id}`, {}, token);
+      // Update timeslot via admin service
+      await HttpService.patch(`/admin/timeslots/${timeslot_id}`, {}, token);
+
+      // Fetch office address from admin service
+      const officeAddressResponse = await HttpService.get(
+        `/admin/office/${office_id}`,
+        {},
+        token
+      );
+
+      if (!officeAddressResponse.address) {
+        throw new ApiError(
+          "Failed to fetch office address",
+          httpStatus.BAD_REQUEST
+        );
+      }
+
+      const office_address = officeAddressResponse.address;
 
       // Fetch home address from user service
       const userAddressResponse = await HttpService.get(
@@ -45,6 +61,9 @@ class RideService {
 
       const home_address = userAddressResponse.address;
 
+      const ride_start_address = isLogin ? home_address : office_address;
+      const ride_end_address = isLogin ? office_address : home_address;
+
       // Create ride
       const ride = await Ride.create({
         user: userId,
@@ -52,12 +71,19 @@ class RideService {
         timeslot: timeslot_id,
         date: new Date(date),
         type: isLogin ? RideType.LOGIN : RideType.LOGOUT,
-        home_location: {
+        ride_start_location: {
           type: "Point",
-          coordinates: home_address.coordinates,
-          address: home_address.address,
-          landmark: home_address.landmark,
-          place_id: home_address.place_id,
+          coordinates: ride_start_address.coordinates,
+          address: ride_start_address.address,
+          landmark: ride_start_address.landmark,
+          place_id: ride_start_address.place_id,
+        },
+        ride_end_location: {
+          type: "Point",
+          coordinates: ride_end_address.coordinates,
+          address: ride_end_address.address,
+          landmark: ride_end_address.landmark,
+          place_id: ride_end_address.place_id,
         },
         status: RideStatus.PENDING,
       });

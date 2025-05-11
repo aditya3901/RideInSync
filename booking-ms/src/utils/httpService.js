@@ -125,6 +125,13 @@ class HttpService {
   }
 
   /**
+   * PATCH request to gateway service
+   */
+  static async patch(endpoint, data = {}, token = null) {
+    return this.gatewayRequest("patch", endpoint, data, {}, token);
+  }
+
+  /**
    * DELETE request to gateway service
    */
   static async delete(endpoint, token = null) {

@@ -8,7 +8,8 @@ const ApiError = require("../utils/ApiError");
  * @returns {Promise<{office: Office, company: Company}>}
  */
 const createOffice = async (officeData) => {
-  const { company_id, name, address, lat, lng } = officeData;
+  const { company_id, name, address, lat, lng, landmark, place_id } =
+    officeData;
 
   const company = await Company.findById(company_id);
   if (!company) {
@@ -18,10 +19,12 @@ const createOffice = async (officeData) => {
   const office = await Office.create({
     company: company_id,
     name,
-    address,
-    location: {
+    address: {
       type: "Point",
       coordinates: [lng, lat],
+      address,
+      landmark,
+      place_id,
     },
   });
 
@@ -40,7 +43,7 @@ const getNearbyOffices = async (query) => {
   const { company_id, latitude, longitude, maxDistance = 10000 } = query;
 
   let filter = {
-    location: {
+    "address.coordinates": {
       $near: {
         $geometry: {
           type: "Point",
@@ -58,7 +61,21 @@ const getNearbyOffices = async (query) => {
   return Office.find(filter);
 };
 
+/**
+ * Get office by ID
+ * @param {string} officeId
+ * @returns {Promise<Office>}
+ */
+const getOfficeById = async (officeId) => {
+  const office = await Office.findById(officeId).populate("company");
+  if (!office) {
+    throw new ApiError("Office not found", httpStatus.NOT_FOUND);
+  }
+  return office;
+};
+
 module.exports = {
   createOffice,
   getNearbyOffices,
+  getOfficeById,
 };

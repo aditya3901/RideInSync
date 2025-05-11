@@ -14,9 +14,7 @@ const rideValidation = {
       date: Joi.date().iso().required(),
       office_id: Joi.string().required(),
       timeslot_id: Joi.string().required(),
-      home_type: Joi.string()
-        .valid("primary_address", "secondary_address")
-        .required(),
+      home_type: Joi.string().valid("primary", "secondary").required(),
     }),
   },
 

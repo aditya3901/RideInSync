@@ -1,5 +1,21 @@
 const mongoose = require("mongoose");
 
+const locationSchema = new mongoose.Schema({
+  type: {
+    type: String,
+    default: "Point",
+    enum: ["Point"],
+  },
+  coordinates: {
+    type: [Number],
+    required: true,
+    index: "2dsphere",
+  },
+  address: String,
+  landmark: String,
+  place_id: String,
+});
+
 const officeSchema = new mongoose.Schema(
   {
     company: {
@@ -13,20 +29,8 @@ const officeSchema = new mongoose.Schema(
       trim: true,
     },
     address: {
-      type: String,
+      type: locationSchema,
       required: true,
-      trim: true,
-    },
-    location: {
-      type: {
-        type: String,
-        default: "Point",
-        enum: ["Point"],
-      },
-      coordinates: {
-        type: [Number],
-        index: "2dsphere",
-      },
     },
   },
   {
@@ -34,7 +38,7 @@ const officeSchema = new mongoose.Schema(
   }
 );
 
-officeSchema.index({ location: "2dsphere" });
+officeSchema.index({ address: "2dsphere" });
 
 /**
  * @typedef Office

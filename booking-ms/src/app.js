@@ -33,7 +33,7 @@ if (config.env !== "production") {
 }
 
 // API routes
-app.use("/api/v1", routes);
+app.use("/", routes);
 
 // Service health check
 app.get("/health", (req, res) => {

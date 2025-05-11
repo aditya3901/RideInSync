@@ -27,7 +27,20 @@ const getNearbyOffices = catchAsync(async (req, res) => {
   });
 });
 
+/**
+ * Get office by ID
+ * @route GET /api/v1/admin/offices/:officeId
+ */
+const getOfficeById = catchAsync(async (req, res) => {
+  const office = await officeService.getOfficeById(req.params.officeId);
+  res.status(httpStatus.OK).json({
+    status: "success",
+    office,
+  });
+});
+
 module.exports = {
   createOffice,
   getNearbyOffices,
+  getOfficeById,
 };

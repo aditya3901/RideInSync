@@ -16,4 +16,11 @@ router
     officeController.getNearbyOffices
   );
 
+router
+  .route("/:officeId")
+  .get(
+    validate(officeValidation.getOfficeById),
+    officeController.getOfficeById
+  );
+
 module.exports = router;

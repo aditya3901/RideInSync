@@ -58,15 +58,14 @@ const rideSchema = new mongoose.Schema(
       type: String,
       enum: Object.values(RideType),
       required: true,
-      index: true,
     },
-    home_location: {
+    ride_start_location: {
       type: locationSchema,
       required: true,
     },
-    office_location: {
+    ride_end_location: {
       type: locationSchema,
-      default: null,
+      required: true,
     },
     status: {
       type: String,
@@ -74,17 +73,10 @@ const rideSchema = new mongoose.Schema(
       default: RideStatus.PENDING,
       index: true,
     },
-    cluster_id: {
-      type: String,
-      default: null,
-      index: true,
-    },
     estimated_pickup_time: Date,
     estimated_arrival_time: Date,
     actual_pickup_time: Date,
     actual_arrival_time: Date,
-    ride_start_location: locationSchema,
-    ride_end_location: locationSchema,
     distance: {
       type: Number,
       default: 0,
@@ -100,10 +92,6 @@ const rideSchema = new mongoose.Schema(
       default: null,
     },
     feedback: String,
-    fare: {
-      type: Number,
-      default: 0,
-    },
     assignedAt: Date,
     completedAt: Date,
     cancelledAt: Date,
@@ -115,17 +103,17 @@ const rideSchema = new mongoose.Schema(
 );
 
 // Compound indexes for frequent queries
-rideSchema.index({ status: 1, date: 1 });
-rideSchema.index({ status: 1, driver: 1 });
-rideSchema.index({ status: 1, user: 1 });
-rideSchema.index({ timeslot: 1, type: 1, status: 1 });
+// rideSchema.index({ status: 1, date: 1 });
+// rideSchema.index({ status: 1, driver: 1 });
+// rideSchema.index({ status: 1, user: 1 });
+// rideSchema.index({ timeslot: 1, type: 1, status: 1 });
 rideSchema.index({ home_location: "2dsphere" });
+rideSchema.index({ office_location: "2dsphere" });
 
 /**
  * Add pre-save hook to set virtual fields
  */
 rideSchema.pre("save", function (next) {
-  // Set assignedAt timestamp when status changes to SCHEDULED
   if (
     this.isModified("status") &&
     this.status === RideStatus.SCHEDULED &&
@@ -134,7 +122,6 @@ rideSchema.pre("save", function (next) {
     this.assignedAt = new Date();
   }
 
-  // Set completedAt timestamp when status changes to COMPLETED
   if (
     this.isModified("status") &&
     this.status === RideStatus.COMPLETED &&
@@ -143,7 +130,6 @@ rideSchema.pre("save", function (next) {
     this.completedAt = new Date();
   }
 
-  // Set cancelledAt timestamp when status changes to CANCELLED
   if (
     this.isModified("status") &&
     this.status === RideStatus.CANCELLED &&

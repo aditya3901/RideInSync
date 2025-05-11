@@ -8,8 +8,8 @@ const router = express.Router();
 /**
  * API Routes
  */
-router.use("/companies", companyRoutes);
-router.use("/offices", officeRoutes);
+router.use("/company", companyRoutes);
+router.use("/office", officeRoutes);
 router.use("/timeslots", timeslotRoutes);
 
 module.exports = router;
