@@ -36,14 +36,14 @@ class RideService {
         token
       );
 
-      if (!officeAddressResponse.address) {
+      if (!officeAddressResponse.office.address) {
         throw new ApiError(
           "Failed to fetch office address",
           httpStatus.BAD_REQUEST
         );
       }
 
-      const office_address = officeAddressResponse.address;
+      const office_address = officeAddressResponse.office.address;
 
       // Fetch home address from user service
       const userAddressResponse = await HttpService.get(
