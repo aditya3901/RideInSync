@@ -373,9 +373,13 @@ class RideService {
       results.totalClusters += clusters.length;
 
       // Assign each cluster to an available driver
-      for (let i = 0; i < clusters.length && i < availableDrivers.length; i++) {
-        const cluster = clusters[i];
-        const driver = availableDrivers[i];
+      for (const cluster of clusters) {
+        const driverResponse = await HttpService.get(
+          `/auth/driver/available?office=${cluster[0].ride.office}&type=${cluster[0].ride.type}`,
+          {},
+          config.auth.serviceToken
+        );
+        const driver = driverResponse.driver;
 
         try {
           const clusterId = `${timeslotId}_${driver._id}_${Date.now()}`;
@@ -392,9 +396,14 @@ class RideService {
 
           await Promise.all(updateOps);
 
-          await HttpService.put(`/auth/drivers/${driver._id}/availability`, {
-            isAvailable: false,
-          });
+          await HttpService.patch(
+            "/auth/driver/available",
+            {
+              driver: driver._id,
+              isAvailable: false,
+            },
+            config.auth.serviceToken
+          );
 
           results.assignedRides += rideIds.length;
 

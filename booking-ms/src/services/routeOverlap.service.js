@@ -242,27 +242,16 @@ class RouteOverlapService {
         `Processing batch ${i / batchSize + 1} with ${batch.length} rides`
       );
 
-      // Use Promise.allSettled to handle individual failures
       const batchPromises = batch.map(async (ride) => {
         try {
-          if (
-            !ride.home_location ||
-            !ride.home_location.coordinates ||
-            !ride.office ||
-            !ride.office.location
-          ) {
-            logger.warn(`Ride ${ride._id} is missing location data`);
-            return { ride, route: [] };
-          }
-
           const origin = {
-            lat: ride.home_location.coordinates[1], // lat is second in GeoJSON
-            lng: ride.home_location.coordinates[0], // lng is first in GeoJSON
+            lat: ride.ride_start_location.coordinates[1],
+            lng: ride.ride_start_location.coordinates[0],
           };
 
           const destination = {
-            lat: ride.office.location.coordinates[1],
-            lng: ride.office.location.coordinates[0],
+            lat: ride.ride_end_location.coordinates[1],
+            lng: ride.ride_end_location.coordinates[0],
           };
 
           const route = await this.getRoutePolyline(origin, destination);
