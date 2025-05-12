@@ -17,6 +17,13 @@ router
   );
 
 router
+  .route("/range")
+  .get(
+    validate(timeslotValidation.getTimeslotsByTimeRange),
+    timeslotController.getTimeslotsByTimeRange
+  );
+
+router
   .route("/:timeslotId")
   .patch(
     validate(timeslotValidation.updateTimeslot),

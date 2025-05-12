@@ -56,6 +56,43 @@ const getFutureTimeslots = async (params) => {
 };
 
 /**
+ * Get timeslots by time range
+ * @param {Object} params
+ * @returns {Promise<Timeslot[]>}
+ */
+const getTimeslotsByTimeRange = async (params) => {
+  const { start, end, office_id, type } = params;
+
+  if (!start || !end) {
+    throw new ApiError(
+      "Start and end times are required",
+      httpStatus.BAD_REQUEST
+    );
+  }
+
+  const date = moment(start).format("YYYY-MM-DD");
+  const startTime = moment.utc(start).format("HH:mm");
+  const endTime = moment.utc(end).format("HH:mm");
+
+  const query = {
+    date: new Date(date),
+    time: { $gte: startTime, $lte: endTime },
+  };
+
+  if (office_id) {
+    query.office = office_id;
+  }
+
+  if (type) {
+    query.type = type;
+  }
+
+  const timeslots = await Timeslot.find(query);
+
+  return timeslots;
+};
+
+/**
  * Add admin slots for an office
  * @param {Object} slotData
  * @returns {Promise<AdminSlots>}
@@ -109,4 +146,5 @@ module.exports = {
   getFutureTimeslots,
   addAdminSlots,
   updateTimeslot,
+  getTimeslotsByTimeRange,
 };

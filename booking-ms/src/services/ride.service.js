@@ -1,5 +1,6 @@
 const httpStatus = require("http-status");
 const mongoose = require("mongoose");
+const config = require("../config/env.config");
 const Ride = require("../models/ride.model");
 const HttpService = require("../utils/httpService");
 const ApiError = require("../utils/ApiError");
@@ -245,52 +246,41 @@ class RideService {
   }
 
   /**
-   * Find pending rides for the next timeslot
+   * Find pending rides for the next timeslots
    * @param {Date} startTime - Start time window
    * @param {Date} endTime - End time window
    * @returns {Promise<Object[]>} - Timeslots with pending rides
    */
   static async findPendingRidesByTimeslot(startTime, endTime) {
-    logger.info(
-      `Finding pending rides between ${startTime.toISOString()} and ${endTime.toISOString()}`
+    // Fetch timeslots from startTime to endTime from admin service
+    const timeslotsResponse = await HttpService.get(
+      `/admin/timeslots/range?start=${startTime}&end=${endTime}`,
+      {},
+      token
     );
 
-    return Ride.aggregate([
-      {
-        $match: {
-          status: RideStatus.PENDING,
-          date: { $gte: startTime, $lte: endTime },
-        },
-      },
-      {
-        $lookup: {
-          from: "timeslots",
-          localField: "timeslot",
-          foreignField: "_id",
-          as: "timeslotDetails",
-        },
-      },
-      {
-        $unwind: "$timeslotDetails",
-      },
-      {
-        $group: {
-          _id: "$timeslot",
-          date: { $first: "$date" },
-          time: { $first: "$timeslotDetails.time" },
-          type: { $first: "$type" },
-          office: { $first: "$office" },
-          count: { $sum: 1 },
-          rides: { $push: "$$ROOT" },
-        },
-      },
-      {
-        $sort: {
-          date: 1,
-          time: 1,
-        },
-      },
-    ]);
+    const timeslots = timeslotsResponse.timeslots;
+    if (!timeslots || timeslots.length === 0) {
+      return [];
+    }
+
+    const timeslotRides = [];
+
+    for (const timeslot of timeslots) {
+      const rides = await Ride.find({
+        timeslot: timeslot._id,
+        status: RideStatus.PENDING,
+      });
+
+      if (rides.length > 0) {
+        timeslotRides.push({
+          timeslot,
+          rides,
+        });
+      }
+    }
+
+    return timeslotRides;
   }
 
   /**
@@ -311,72 +301,57 @@ class RideService {
       totalClusters: 0,
     };
 
-    if (!timeslotRides || timeslotRides.length === 0) {
-      logger.info("No timeslots with pending rides to process");
-      return results;
-    }
+    for (const entry of timeslotRides) {
+      const { timeslot, rides } = entry;
+      const timeslotId = timeslot._id;
 
-    logger.info(
-      `Processing ${timeslotRides.length} timeslots for driver assignment`
-    );
-
-    for (const timeslot of timeslotRides) {
       logger.info(
-        `Processing timeslot ${timeslot._id} with ${timeslot.rides.length} rides`
+        `Processing timeslot ${timeslotId} with ${rides.length} rides`
       );
       results.processedTimeslots++;
-
-      // Fetch available drivers
-      let availableDrivers;
-      try {
-        const driversResponse = await HttpService.get(
-          "/auth/drivers/available"
-        );
-        availableDrivers = driversResponse.drivers || [];
-      } catch (error) {
-        logger.error("Failed to fetch available drivers:", error);
-        availableDrivers = [];
-      }
-
-      if (!availableDrivers || availableDrivers.length === 0) {
-        logger.warn("No available drivers for assignment");
-        continue;
-      }
-
-      logger.info(`Found ${availableDrivers.length} available drivers`);
-
-      const rides = timeslot.rides;
 
       // Skip if not enough rides
       if (rides.length < 2) {
         logger.info(
-          `Not enough rides (${rides.length}) for clustering in timeslot ${timeslot._id}`
+          `Not enough rides (${rides.length}) for clustering in timeslot ${timeslotId}`
         );
 
-        // If there's only one ride, assign it directly
-        if (rides.length === 1 && availableDrivers.length > 0) {
-          const ride = rides[0];
-          const driver = availableDrivers[0];
+        const ride = rides[0];
+        const driverResponse = await HttpService.get(
+          `/auth/driver/available?office=${ride.office}&type=${ride.type}`,
+          {},
+          config.auth.serviceToken
+        );
+        const driver = driverResponse.driver;
 
-          try {
-            await this.updateRideStatus(ride._id, RideStatus.SCHEDULED, {
+        if (!driver) {
+          logger.warn("No available driver for ride");
+          continue;
+        }
+
+        try {
+          await this.updateRideStatus(ride._id, RideStatus.SCHEDULED, {
+            driver: driver._id,
+            assignedAt: new Date(),
+          });
+
+          await HttpService.patch(
+            "/auth/driver/available",
+            {
               driver: driver._id,
-              assignedAt: new Date(),
-            });
-
-            await HttpService.put(`/auth/drivers/${driver._id}/availability`, {
               isAvailable: false,
-            });
+            },
+            config.auth.serviceToken
+          );
 
-            results.assignedRides++;
-            results.totalClusters++;
+          results.assignedRides++;
+          results.totalClusters++;
 
-            logger.info(
-              `Assigned single ride ${ride._id} to driver ${driver._id}`
-            );
-          } catch (error) {
-            logger.error(`Failed to assign single ride ${ride._id}:`, error);
-          }
+          logger.info(
+            `Assigned single ride ${ride._id} to driver ${driver._id}`
+          );
+        } catch (error) {
+          logger.error(`Failed to assign single ride ${ride._id}:`, error);
         }
 
         continue;
@@ -393,7 +368,7 @@ class RideService {
       );
 
       logger.info(
-        `Created ${clusters.length} ride clusters for timeslot ${timeslot._id}`
+        `Created ${clusters.length} ride clusters for timeslot ${timeslotId}`
       );
       results.totalClusters += clusters.length;
 
@@ -403,10 +378,8 @@ class RideService {
         const driver = availableDrivers[i];
 
         try {
-          // Generate unique cluster ID
-          const clusterId = `${timeslot._id}_${driver._id}_${Date.now()}`;
+          const clusterId = `${timeslotId}_${driver._id}_${Date.now()}`;
 
-          // Update all rides in this cluster
           const rideIds = cluster.map((item) => item.ride._id);
 
           const updateOps = rideIds.map((rideId) =>
@@ -419,7 +392,6 @@ class RideService {
 
           await Promise.all(updateOps);
 
-          // Mark driver as unavailable
           await HttpService.put(`/auth/drivers/${driver._id}/availability`, {
             isAvailable: false,
           });

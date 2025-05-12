@@ -22,6 +22,18 @@ const timeslotValidation = {
   },
 
   /**
+   * Schema for getting timeslots by time range
+   */
+  getTimeslotsByTimeRange: {
+    query: Joi.object().keys({
+      start: Joi.date().iso().required(),
+      end: Joi.date().iso().required(),
+      office_id: Joi.string(),
+      type: Joi.string().valid(...Object.values(TimeslotType)),
+    }),
+  },
+
+  /**
    * Schema for adding admin slots
    */
   addAdminSlots: {

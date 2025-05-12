@@ -24,6 +24,29 @@ const getTimeslots = catchAsync(async (req, res, next) => {
 });
 
 /**
+ * Get timeslots by time range
+ * @route GET /api/v1/admin/timeslots/range
+ */
+const getTimeslotsByTimeRange = catchAsync(async (req, res, next) => {
+  const timeslots = await timeslotService.getTimeslotsByTimeRange(req.query);
+
+  if (!timeslots || timeslots.length === 0) {
+    return next(
+      new ApiError(
+        "No timeslots found in the specified range",
+        httpStatus.NOT_FOUND
+      )
+    );
+  }
+
+  res.status(httpStatus.OK).json({
+    status: "success",
+    results: timeslots.length,
+    timeslots,
+  });
+});
+
+/**
  * Add admin slots for an office
  * @route POST /api/v1/admin/timeslots
  */
@@ -55,4 +78,5 @@ module.exports = {
   getTimeslots,
   addAdminSlots,
   updateTimeslot,
+  getTimeslotsByTimeRange,
 };
