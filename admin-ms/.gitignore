@@ -1,2 +1,33 @@
+# Dependency directories
+node_modules/
+
+# Environment variables
 config.env
-node_modules
+.env
+.env.*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage directory
+coverage/
+
+# Package lock and npm debug
+npm-debug.log
+package-lock.json
+
+# OS specific
+.DS_Store
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
