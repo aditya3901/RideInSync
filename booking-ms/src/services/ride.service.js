@@ -143,11 +143,7 @@ class RideService {
       `Fetching rides for user ${userId} with filter ${JSON.stringify(filter)}`
     );
 
-    return Ride.find({ user: userId, ...filter })
-      .sort({ date: -1 })
-      .populate("driver")
-      .populate("office")
-      .populate("timeslot");
+    return Ride.find({ user: userId, ...filter }).sort({ date: -1 });
   }
 
   /**

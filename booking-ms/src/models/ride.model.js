@@ -102,13 +102,8 @@ const rideSchema = new mongoose.Schema(
   }
 );
 
-// Compound indexes for frequent queries
-// rideSchema.index({ status: 1, date: 1 });
-// rideSchema.index({ status: 1, driver: 1 });
-// rideSchema.index({ status: 1, user: 1 });
-// rideSchema.index({ timeslot: 1, type: 1, status: 1 });
-rideSchema.index({ home_location: "2dsphere" });
-rideSchema.index({ office_location: "2dsphere" });
+rideSchema.index({ ride_start_location: "2dsphere" });
+rideSchema.index({ ride_end_location: "2dsphere" });
 
 /**
  * Add pre-save hook to set virtual fields
