@@ -1,3 +1,4 @@
+<pre>
 RideInSync/
 ├── .git/
 ├── .DS_Store
@@ -134,3 +135,4 @@ RideInSync/
     ├── package.json
     ├── package-lock.json
     └── node_modules/
+<pre>
