@@ -111,6 +111,27 @@ const rideController = {
       },
     });
   }),
+
+  /**
+   * Get upcoming rides for a driver
+   * GET /rides/driver/upcoming
+   */
+  getDriverUpcomingRides: asyncHandler(async (req, res) => {
+    const driverId = req.user.id;
+
+    const timeslotRides = await RideService.getDriverUpcomingRides(
+      driverId,
+      req.query
+    );
+
+    res.status(httpStatus.OK).json({
+      status: "success",
+      results: timeslotRides.length,
+      data: {
+        timeslotRides,
+      },
+    });
+  }),
 };
 
 module.exports = rideController;

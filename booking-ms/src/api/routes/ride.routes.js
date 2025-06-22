@@ -19,18 +19,6 @@ router.post(
 );
 
 /**
- * @route   GET /rides/me
- * @desc    Get rides for the current user
- * @access  Private
- */
-router.get(
-  "/me",
-  authenticate,
-  validate(rideValidation.getUserRides),
-  rideController.getUserRides
-);
-
-/**
  * @route   GET /rides/:rideId
  * @desc    Get ride by ID
  * @access  Private
@@ -76,6 +64,30 @@ router.post(
   authenticate,
   validate(rideValidation.rateRide),
   rideController.rateRide
+);
+
+/**
+ * @route   GET /rides/user/upcoming
+ * @desc    Get upcoming rides for a user
+ * @access  Private
+ */
+router.get(
+  "/user/upcoming",
+  authenticate,
+  validate(rideValidation.getUpcomingRides),
+  rideController.getUserRides
+);
+
+/**
+ * @route   GET /rides/driver/upcoming
+ * @desc    Get upcoming rides for a driver
+ * @access  Private
+ */
+router.get(
+  "/driver/upcoming",
+  authenticate,
+  validate(rideValidation.getUpcomingRides),
+  rideController.getDriverUpcomingRides
 );
 
 module.exports = router;

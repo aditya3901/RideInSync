@@ -71,8 +71,8 @@ const getTimeslotsByTimeRange = async (params) => {
   }
 
   const date = moment(start).format("YYYY-MM-DD");
-  const startTime = moment.utc(start).format("HH:mm");
-  const endTime = moment.utc(end).format("HH:mm");
+  const startTime = moment(start).format("HH:mm");
+  const endTime = moment(end).format("HH:mm");
 
   const query = {
     date: new Date(date),

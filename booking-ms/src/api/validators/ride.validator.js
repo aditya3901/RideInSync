@@ -28,20 +28,6 @@ const rideValidation = {
   },
 
   /**
-   * Schema for getting rides for a user
-   */
-  getUserRides: {
-    query: Joi.object().keys({
-      status: Joi.string().valid(...Object.values(RideStatus)),
-      type: Joi.string().valid(...Object.values(RideType)),
-      from: Joi.date().iso(),
-      to: Joi.date().iso().greater(Joi.ref("from")),
-      page: Joi.number().integer().min(1),
-      limit: Joi.number().integer().min(1).max(100),
-    }),
-  },
-
-  /**
    * Schema for updating ride status
    */
   updateRideStatus: {
@@ -90,6 +76,20 @@ const rideValidation = {
         similarityThreshold: Joi.number().min(0).max(1),
       })
       .min(1),
+  },
+
+  /**
+   * Schema for getting upcoming rides
+   */
+  getUpcomingRides: {
+    query: Joi.object().keys({
+      status: Joi.string().valid(...Object.values(RideStatus)),
+      type: Joi.string().valid(...Object.values(RideType)),
+      from: Joi.date().iso(),
+      to: Joi.date().iso().greater(Joi.ref("from")),
+      page: Joi.number().integer().min(1),
+      limit: Joi.number().integer().min(1).max(100),
+    }),
   },
 };
 

@@ -139,10 +139,6 @@ class RideService {
       throw new ApiError("Invalid user ID", httpStatus.BAD_REQUEST);
     }
 
-    logger.info(
-      `Fetching rides for user ${userId} with filter ${JSON.stringify(filter)}`
-    );
-
     return Ride.find({ user: userId, ...filter }).sort({ date: -1 });
   }
 
@@ -252,7 +248,7 @@ class RideService {
     const timeslotsResponse = await HttpService.get(
       `/admin/timeslots/range?start=${startTime}&end=${endTime}`,
       {},
-      token
+      config.auth.serviceToken
     );
 
     const timeslots = timeslotsResponse.timeslots;
@@ -421,6 +417,71 @@ class RideService {
     );
 
     return results;
+  }
+
+  /**
+   * Get upcoming rides for a driver
+   * @param {string} driverId - Driver ID
+   * @param {Date} date - Date to get rides for
+   * @returns {Promise<Object[]>} - Array of timeslots with rides
+   */
+  static async getDriverUpcomingRides(driverId, query) {
+    if (!mongoose.Types.ObjectId.isValid(driverId)) {
+      throw new ApiError("Invalid driver ID", httpStatus.BAD_REQUEST);
+    }
+
+    const startDate = new Date(query.from || Date.now());
+    const endDate = new Date(query.to || Date.now());
+    if (!query.to) endDate.setHours(23, 59, 59, 999);
+
+    // Get all timeslots for the given date
+    const timeslotsResponse = await HttpService.get(
+      `/admin/timeslots/range?start=${startDate.toISOString()}&end=${endDate.toISOString()}`,
+      {},
+      config.auth.serviceToken
+    );
+
+    const timeslots = timeslotsResponse.timeslots;
+    if (!timeslots || timeslots.length === 0) {
+      return [];
+    }
+
+    const timeslotRides = [];
+
+    // For each timeslot, find rides assigned to the driver
+    for (const timeslot of timeslots) {
+      const rides = await Ride.find({
+        timeslot: timeslot._id,
+        driver: driverId,
+        status: { $in: [RideStatus.SCHEDULED, RideStatus.IN_PROGRESS] },
+      })
+        .populate("user", "name email phone")
+        .populate("office", "name address")
+        .sort({ "ride_start_location.address": 1 });
+
+      if (rides.length > 0) {
+        timeslotRides.push({
+          timeslot: {
+            _id: timeslot._id,
+            date: timeslot.date,
+            time: timeslot.time,
+          },
+          rides: rides.map((ride) => ({
+            _id: ride._id,
+            type: ride.type,
+            status: ride.status,
+            ride_start_location: ride.ride_start_location,
+            ride_end_location: ride.ride_end_location,
+            estimated_pickup_time: ride.estimated_pickup_time,
+            estimated_arrival_time: ride.estimated_arrival_time,
+            user: ride.user,
+            office: ride.office,
+          })),
+        });
+      }
+    }
+
+    return timeslotRides;
   }
 }
 

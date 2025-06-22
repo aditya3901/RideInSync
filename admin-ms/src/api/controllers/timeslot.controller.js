@@ -31,12 +31,11 @@ const getTimeslotsByTimeRange = catchAsync(async (req, res, next) => {
   const timeslots = await timeslotService.getTimeslotsByTimeRange(req.query);
 
   if (!timeslots || timeslots.length === 0) {
-    return next(
-      new ApiError(
-        "No timeslots found in the specified range",
-        httpStatus.NOT_FOUND
-      )
-    );
+    return res.status(httpStatus.OK).json({
+      status: "success",
+      results: 0,
+      timeslots: [],
+    });
   }
 
   res.status(httpStatus.OK).json({

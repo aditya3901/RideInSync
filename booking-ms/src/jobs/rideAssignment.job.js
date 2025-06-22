@@ -60,14 +60,12 @@ class RideAssignmentJob {
     const now = new Date();
     const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
 
-    logger.info(
-      `Looking for rides between ${now.toISOString()} and ${oneHourLater.toISOString()}`
-    );
+    logger.info(`Looking for rides between ${now} and ${oneHourLater}`);
 
     // Find pending rides by timeslot
     const timeslotRides = await RideService.findPendingRidesByTimeslot(
-      now,
-      oneHourLater
+      now.toISOString(),
+      oneHourLater.toISOString()
     );
 
     if (!timeslotRides || timeslotRides.length === 0) {
